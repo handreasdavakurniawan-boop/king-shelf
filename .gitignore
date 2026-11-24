@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local tooling, not part of the website
+.claude/
+.taste-skill/
+graphify-out/
+
+# Private project notes (the repo is public; only the website code is published)
+RENCANA.md
+DAFTAR-BUKU.md
+konten/
