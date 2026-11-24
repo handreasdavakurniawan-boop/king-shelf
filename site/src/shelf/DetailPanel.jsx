@@ -4,8 +4,10 @@ import { books } from '../data/books'
 import { details } from '../data/details'
 import { toRoman } from '../covers/drawCover'
 
-const compact = (n) =>
-  n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k` : String(n)
+const compact = (n) => {
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M`
+  return n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k` : String(n)
+}
 
 function byline(credit) {
   if (credit.startsWith('Selected by')) return credit
@@ -38,7 +40,7 @@ export default function DetailPanel({ slug, onClose, onStep }) {
       {info.rating && (
         <p className="detail-rating">
           <span className="stars" aria-hidden="true">★</span>
-          <strong>{info.rating.value.toFixed(1)}</strong>
+          <strong>{info.rating.value.toFixed(info.rating.digits ?? 1)}</strong>
           <span className="muted">
             {' '}· {info.rating.source}
             {info.rating.count ? ` · ${compact(info.rating.count)} ratings` : ''}

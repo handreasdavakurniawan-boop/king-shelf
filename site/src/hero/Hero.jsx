@@ -3,7 +3,6 @@
 // so a cover drawn here is already cached when its book is opened on the shelf.
 import { useEffect, useState } from 'react'
 import { books } from '../data/books'
-import { details } from '../data/details'
 import { colorFor } from '../covers/palette'
 import { renderCover } from '../covers/drawCover'
 import { pickFeatured } from './featured'
@@ -12,7 +11,7 @@ const years = books.map((b) => b.year)
 const FIRST = Math.min(...years)
 const LATEST = Math.max(...years)
 const NOVELS = books.filter((b) => b.type === 'Novel').length
-const featured = pickFeatured(books, details)
+const featured = pickFeatured(books)
 // Centre slot largest, then each step outward a little smaller and further back.
 const SCALE = [0.74, 0.86, 1, 0.86, 0.74]
 const DEPTH = [1, 2, 3, 2, 1]
