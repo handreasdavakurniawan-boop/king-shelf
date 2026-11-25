@@ -328,7 +328,11 @@ tbody tr:hover { background: var(--bg-raised); }
 .far-soft { filter: blur(6px); opacity: calc(1 - var(--p)); }
 .l-mid { filter: blur(3px); }
 .h-books img { filter: blur(4px); }
-.hero-zoom { will-change: transform; }
+/* Everything that moves every frame gets its own GPU layer, so the browser only moves or
+   fades a finished picture instead of repainting the big SVGs, blurs and text shadows. */
+.hero-zoom, .hero-title, .paper { will-change: transform, opacity; }
+.far-soft, .hero-dim, .hero-stick::after, .t-king::after, .candle-glow { will-change: opacity; }
+.hero-title span, .h-dust, .far-sharp .l-writer { will-change: translate; }
 .candle-glow {
   position: absolute; left: 150px; top: 440px; width: 220px; height: 220px; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255, 199, 102, 0.4), transparent);
@@ -393,7 +397,8 @@ tbody tr:hover { background: var(--bg-raised); }
   .t-the { --d: 0.6s; }
   .t-king { --d: 0.75s; }
   .t-shelf { --d: 0.9s; }
-  .l-writer { animation: breathe 4.5s ease-in-out infinite; }
+  /* only the sharp copy breathes: under the blur it can't be seen, and moving it there would re-blur the room every frame */
+  .far-sharp .l-writer { animation: breathe 4.5s ease-in-out infinite; }
   .candle-glow { animation: flicker 3.2s steps(1) infinite; }
   .h-dust { animation: drift 14s ease-in-out infinite alternate; }
   .caret { animation: blink 1s steps(1) infinite; }

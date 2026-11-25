@@ -37,21 +37,33 @@ export default function Hero() {
   const [typed, setTyped] = useState(0)
 
   // Fit the design frame to the screen and track how far the zoom has gone (0..1).
+  // The zoom follows the scroll position with a short ease instead of jumping to it:
+  // a mouse wheel moves the page ~100px per notch, which would otherwise zoom in steps.
   useEffect(() => {
     const el = ref.current
     let raf = 0
-    const update = () => {
-      raf = 0
+    let target = 0
+    let current = 0
+    let last = 0
+    const measure = () => {
       const vw = window.innerWidth
       const vh = window.innerHeight
       const portrait = vw < vh
       el.classList.toggle('is-portrait', portrait)
       el.style.setProperty('--s', Math.min(vw / (portrait ? 390 : 1440), vh / (portrait ? 844 : 900)))
       const r = el.getBoundingClientRect()
-      const p = reducedMotion() ? 0 : Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)))
-      el.style.setProperty('--p', p.toFixed(4))
+      target = reducedMotion() ? 0 : Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)))
     }
-    const queue = () => { raf ||= requestAnimationFrame(update) }
+    const tick = (now) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60
+      last = now
+      current += (target - current) * (1 - Math.exp(-dt * 12))
+      if (Math.abs(target - current) < 0.0005) current = target
+      el.style.setProperty('--p', current.toFixed(4))
+      if (current === target) { raf = 0; last = 0 } else raf = requestAnimationFrame(tick)
+    }
+    const queue = () => { measure(); raf ||= requestAnimationFrame(tick) }
+    const update = () => { measure(); current = target; el.style.setProperty('--p', current.toFixed(4)) }
     update()
     window.addEventListener('scroll', queue, { passive: true })
     window.addEventListener('resize', queue)
