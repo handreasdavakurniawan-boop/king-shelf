@@ -62,7 +62,7 @@ export default function Hero() {
       el.classList.toggle('is-portrait', portrait)
       el.style.setProperty('--s', Math.min(vw / (portrait ? 390 : 1440), vh / (portrait ? 844 : 900)))
       const r = el.getBoundingClientRect()
-      target = reducedMotion() ? 0 : Math.min(1, Math.max(0, -r.top / (ZOOM * vh)))
+      target = reducedMotion() ? 0 : Math.min(1, Math.max(0, -r.top / Math.max(1, ZOOM * vh))) // a hidden/zero-height window would give NaN, which never eases back
     }
     const setP = () => {
       el.style.setProperty('--p', current.toFixed(4))

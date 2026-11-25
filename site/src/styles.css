@@ -91,7 +91,8 @@ html.shelf-page { --edge: clamp(16px, 3.4vw, 56px); scroll-snap-type: y proximit
 html.shelf-page main { all: unset; display: block; }
 html.is-reading { overflow: hidden; }
 
-.shelf { position: relative; height: 100vh; height: 100svh; overflow: hidden; scroll-snap-align: start; outline: none; }
+/* the -4px tucks the shelf over the hero's last rows, where the scaled hero layers leave a light seam */
+.shelf { position: relative; height: 100vh; height: 100svh; margin-top: -4px; overflow: hidden; scroll-snap-align: start; outline: none; }
 .scene { position: absolute; inset: 0; touch-action: pan-y; cursor: grab; }
 html.is-reading .scene { touch-action: none; }
 .scene:active { cursor: grabbing; }
