@@ -1,0 +1,33 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Hero A v2">
+<g id="A1 v2 (revisi) / Desktop" clip-path="url(#clip0_0_1)">
+<g id="6 Ambang">
+<path id="Vector" d="M170 730H1270V758H170V730Z" fill="black" fill-opacity="0.35"/>
+<path id="Vector_2" d="M196 650H1244L1292 686H148L196 650Z" fill="url(#paint0_linear_0_1)"/>
+<path id="Vector_3" d="M196 650H1244L1292 686H148L196 650Z" fill="url(#paint1_radial_0_1)"/>
+<path id="Vector_4" d="M1292 686H148V730H1292V686Z" fill="url(#paint2_linear_0_1)"/>
+<g id="Vector_5">
+<path d="M148 686.5H1292Z" fill="black"/>
+<path d="M148 686.5H1292" stroke-width="2" stroke="#E2AC6E"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_1" x1="2.04073e-06" y1="650" x2="2.04073e-06" y2="686" gradientUnits="userSpaceOnUse">
+<stop stop-color="#5D3721"/>
+<stop offset="1" stop-color="#A96D45"/>
+</linearGradient>
+<radialGradient id="paint1_radial_0_1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(720 664) scale(430 430)">
+<stop stop-color="#FFD98F" stop-opacity="0.65"/>
+<stop offset="1" stop-color="#FFD98F" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="paint2_linear_0_1" x1="4.76837e-06" y1="686" x2="4.76837e-06" y2="730" gradientUnits="userSpaceOnUse">
+<stop stop-color="#5A321D"/>
+<stop offset="1" stop-color="#28150B"/>
+</linearGradient>
+<clipPath id="clip0_0_1">
+<rect width="1440" height="900" fill="white"/>
+</clipPath>
+</defs>
+</svg>

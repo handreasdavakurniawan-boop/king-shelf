@@ -53,7 +53,7 @@ export default function CoverPreview() {
 
       <section className="stage" aria-label="Buku 3D">
         <Canvas camera={{ position: [3.4, 0.8, 4.6], fov: 32 }} shadows dpr={[1, 2]}>
-          <color attach="background" args={['#0b1210']} />
+          <color attach="background" args={['#1c120d']} />
           <ambientLight intensity={0.45} color="#fff2dc" />
           <directionalLight position={[3, 6, 5]} intensity={2.4} color="#ffe3b8" castShadow />
           <directionalLight position={[-4, 2, -3]} intensity={0.6} color="#9fc2ff" />

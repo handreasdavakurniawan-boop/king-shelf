@@ -114,7 +114,7 @@ function Furniture() {
       </mesh>
       <mesh position={[SHELF_LENGTH / 2, 4, -1.25]} receiveShadow>
         <planeGeometry args={[length + 30, 14]} />
-        <meshStandardMaterial color="#14201c" roughness={1} />
+        <meshStandardMaterial color="#2b1c14" roughness={1} />
       </mesh>
     </>
   )
@@ -130,7 +130,7 @@ export default function ShelfScene({ onView, selected, onSelect, onClose, runnin
       camera={{ fov: 28, position: [0, 1.9, 8] }}
       onPointerMissed={() => selected && !inspect.moved && onClose()}
     >
-      <color attach="background" args={['#0b1210']} />
+      <color attach="background" args={['#1c120d']} />
       <ambientLight intensity={0.3} color="#ffeccc" />
       <directionalLight position={[0, 2.5, 9]} intensity={0.55} color="#fff3df" />
       <Lamp />

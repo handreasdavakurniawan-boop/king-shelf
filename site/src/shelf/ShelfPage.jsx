@@ -43,13 +43,6 @@ export default function ShelfPage() {
     setSelected(slug)
   }, [])
 
-  // From the hero: bring the shelf up first, then take the book down.
-  const openFromHero = useCallback((slug) => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    shelfRef.current.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' })
-    open(slug)
-  }, [open])
-
   const close = useCallback(() => {
     shelfState.selected = null
     document.documentElement.classList.remove('is-reading')
@@ -76,7 +69,7 @@ export default function ShelfPage() {
     <>
       <a className="skip-link" href="#shelf">Skip to the shelf</a>
       <main>
-        <Hero onOpen={openFromHero} />
+        <Hero />
         <section id="shelf" className="shelf" ref={shelfRef} aria-labelledby="shelf-title" tabIndex={-1}>
           <div className="scene" ref={setSceneEl}>
             <ShelfScene
