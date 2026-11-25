@@ -328,7 +328,8 @@ tbody tr:hover { background: var(--bg-raised); }
 }
 /* the wall clock: its own layer, so portrait can tuck it under the sound toggle */
 .h-clock { transform: var(--clock); }
-.clock { position: absolute; left: 1124px; top: 70px; width: 156px; height: 350px; filter: blur(1.5px) drop-shadow(0 18px 22px rgba(0, 0, 0, 0.5)); }
+/* no filter: the pendulum moves every frame, and a filter would re-blur the whole clock each time */
+.clock { position: absolute; left: 1124px; top: 70px; width: 156px; height: 350px; opacity: 0.92; }
 .pendulum { transform-origin: 78px 168px; transform-box: view-box; }
 .h-scene, .h-books, .h-clock, .h-dust { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; }
 .h-scene { transform: var(--scene); }
@@ -450,14 +451,14 @@ tbody tr:hover { background: var(--bg-raised); }
 }
 /* portrait: one row of clippings under the writer, swiped sideways */
 .hero.is-portrait .hero-notes {
-  align-items: flex-end; padding: 0 0 24px;
+  align-items: flex-end; padding: 0 0 40px;
   background: linear-gradient(to top, rgba(15, 8, 5, 0.85), rgba(15, 8, 5, 0.4) 55%, transparent 70%);
 }
 .hero.is-portrait .notes-inner { width: 100%; }
 .hero.is-portrait .notes-title { padding: 0 24px; }
 .hero.is-portrait .notes {
   display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 24px;
-  padding: 0 24px 12px; scrollbar-width: none; overscroll-behavior-x: contain;
+  padding: 8px 24px 12px; align-items: stretch; scrollbar-width: none; overscroll-behavior-x: contain;
 }
 .hero.is-portrait .note { flex: 0 0 min(300px, 78vw); scroll-snap-align: start; }
 .hero.is-portrait .notes-swipe { display: block; margin: 4px 24px 0; font: 14px var(--type); color: var(--accent); }
@@ -478,6 +479,7 @@ tbody tr:hover { background: var(--bg-raised); }
   /* reads back what was typed: the head dips toward the page and lifts again */
   .w-head { animation: nod 4.2s ease-in-out infinite; }
   .pendulum { animation: swing 2s ease-in-out infinite alternate; }
+  .hero.is-pinned .pendulum { animation-play-state: paused; } /* zoomed past it, off screen */
   .candle-glow { animation: flicker 3.2s steps(1) infinite; }
   .h-dust { animation: drift 14s ease-in-out infinite alternate; }
   .caret { animation: blink 1s steps(1) infinite; }
