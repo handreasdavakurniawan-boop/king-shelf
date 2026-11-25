@@ -82,9 +82,15 @@ export default function Hero() {
           <div className="hero-zoom">
             <div className="h-scene">
               <div className="halo" />
-              <img className="l-far" src={shafts} alt="" />
-              <img className="l-far l-room" src={room} alt="" />
-              <img className="l-far l-writer" src={writer} alt="" />
+              {/* The far room twice: sharp underneath, a blurred copy on top that fades out as you
+                  zoom. Only opacity changes per scroll frame, so the blur is never re-rendered. */}
+              {['far-sharp', 'far-soft'].map((c) => (
+                <div key={c} className={c}>
+                  <img src={shafts} alt="" />
+                  <img className="l-room" src={room} alt="" />
+                  <img className="l-writer" src={writer} alt="" />
+                </div>
+              ))}
               <img className="l-mid l-glass" src={glass} alt="" />
               <img className="l-mid" src={frame} alt="" />
               <img className="l-mid" src={sill} alt="" />

@@ -200,7 +200,7 @@ html.is-reading .masthead-top { opacity: 0; pointer-events: none; }
 .detail-byline { margin: 10px 0 0; font-style: italic; color: var(--ink-muted); font-size: 20px; }
 .detail-rating { margin: 22px 0 0; font-size: 18px; display: flex; align-items: baseline; gap: 6px; }
 .detail-rating .stars { color: var(--accent); }
-.detail-rating strong { font-family: var(--ui); font-weight: 700; font-size: 20px; }
+.detail-rating strong { font-family: var(--ui); font-weight: 500; font-size: 20px; }
 .detail-rating .muted { color: var(--ink-muted); }
 .detail-synopsis { margin: 22px 0 0; font-size: 21px; line-height: 1.5; }
 .detail-synopsis.is-empty { color: var(--ink-muted); font-style: italic; }
@@ -293,9 +293,14 @@ tbody tr:hover { background: var(--bg-raised); }
 .hero.is-portrait {
   --W: 390px; --H: 844px; --tile: 240px; --fx: 200px; --fy: 470px;
   --scene: translate(-237px, 202px) scale(0.6); --books: translate(-344.8px, 202px) scale(0.6);
-  --px: 26px; --py: 598px; --pw: 338px; --poem-pad: 28px 20px 0; --poem-size: 15px;
+  --px: 26px; --py: 598px; --pw: 338px; --poem-pad: 28px 20px 0; --poem-size: 16px;
 }
 .hero-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--bg); }
+/* at the end of the zoom, fade the lit room into the shelf instead of a hard edge */
+.hero-stick::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 180px; pointer-events: none;
+  background: linear-gradient(transparent, var(--bg)); opacity: var(--p);
+}
 .hero-wall {
   position: absolute; inset: -24px; background-size: calc(var(--tile) * var(--s)) auto;
   filter: blur(calc(7px * var(--s)));
@@ -311,6 +316,7 @@ tbody tr:hover { background: var(--bg-raised); }
 .h-scene, .h-books, .h-dust { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; }
 .h-scene { transform: var(--scene); }
 .h-books, .h-dust { transform: var(--books); }
+.far-sharp, .far-soft { position: absolute; inset: 0; }
 .h-scene img, .h-books img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; }
 .h-scene .l-writer { left: 454.5px; top: 259.5px; width: 481px; height: 420px; }
 .halo {
@@ -319,9 +325,10 @@ tbody tr:hover { background: var(--bg-raised); }
 }
 /* Depth of field: before the zoom the far room is soft; at the end the writer is sharp
    and the glass, sill and books in front go soft instead. */
-.l-far { filter: blur(calc((1 - var(--p)) * 12px)); }
-.l-mid { filter: blur(7px); }
-.h-books img { filter: blur(calc(6px + var(--p) * 6px)); }
+.far-soft { filter: blur(6px); opacity: calc(1 - var(--p)); }
+.l-mid { filter: blur(3px); }
+.h-books img { filter: blur(4px); }
+.hero-zoom { will-change: transform; }
 .candle-glow {
   position: absolute; left: 150px; top: 440px; width: 220px; height: 220px; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255, 199, 102, 0.4), transparent);
@@ -353,7 +360,7 @@ tbody tr:hover { background: var(--bg-raised); }
 /* the title, on its own layer in front of everything */
 .hero-title {
   position: absolute; inset: 0; margin: 0; font-family: var(--display); font-weight: 600; color: var(--ink);
-  transform-origin: 380px 300px;
+  transform-origin: 380px 150px;
   transform: translateY(calc(var(--p) * -140px)) scale(calc(1 + var(--p) * 1.6));
   opacity: calc(1 - var(--p) * 2.2);
 }
@@ -366,6 +373,11 @@ tbody tr:hover { background: var(--bg-raised); }
 .t-the { --x: 187px; --y: 66px; --fs: 72px; color: var(--accent); }
 .t-king { --x: 180px; --y: 75px; --fs: 228px; }
 .t-shelf { --x: 182px; --y: 317px; --fs: 132px; }
+/* the glow is a copy of "King" behind it; only its opacity animates, so nothing repaints */
+.t-king::after {
+  content: 'King'; position: absolute; inset: 0; z-index: -1; color: transparent; opacity: 0;
+  text-shadow: 0 0 34px rgba(212, 154, 58, 0.55);
+}
 .is-portrait .t-the { --x: 24px; --y: 39px; --fs: 44px; }
 .is-portrait .t-king { --x: 19px; --y: 40px; --fs: 150px; }
 .is-portrait .t-shelf { --x: 20px; --y: 175px; --fs: 88px; }
@@ -376,7 +388,8 @@ tbody tr:hover { background: var(--bg-raised); }
   .l-glass { animation: glass-up 1.8s 0.2s ease-out both; }
   /* each line rises in turn, then bobs on its own phase; "King" also glows like it caught the candlelight */
   .hero-title span { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) both, float 7s calc(var(--d) * 3) ease-in-out infinite; }
-  .hero-title .t-king { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) both, float 7s calc(var(--d) * 3) ease-in-out infinite, glow 6s 2s ease-in-out infinite; }
+  .hero-title .t-king { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) both, float 7s calc(var(--d) * 3) ease-in-out infinite; }
+  .t-king::after { animation: glow 6s 2s ease-in-out infinite; }
   .t-the { --d: 0.6s; }
   .t-king { --d: 0.75s; }
   .t-shelf { --d: 0.9s; }
@@ -392,8 +405,15 @@ tbody tr:hover { background: var(--bg-raised); }
 @keyframes glass-up { from { opacity: 0.3; } }
 @keyframes rise { from { opacity: 0; translate: 0 24px; } }
 @keyframes float { 50% { translate: 0 -5px; } }
-@keyframes glow { 50% { text-shadow: 0 0 34px rgba(212, 154, 58, 0.45), 0 14px 40px rgba(10, 5, 3, 0.9), 0 4px 6px rgba(10, 5, 3, 0.95); } }
+@keyframes glow { 50% { opacity: 1; } }
 @keyframes breathe { 50% { translate: 0 1.5px; } }
 @keyframes flicker { 0% { opacity: 1; } 18% { opacity: 0.72; } 31% { opacity: 0.95; } 56% { opacity: 0.8; } 74% { opacity: 1; } 88% { opacity: 0.86; } }
 @keyframes drift { to { translate: 12px -26px; } }
 @keyframes blink { 50% { opacity: 0; } }
+
+/* Everything else on the page also respects reduced motion (the hero handles its own). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+/* short phones: the turn/zoom hint would sit on top of the open book */
+@media (max-aspect-ratio: 1/1) and (max-height: 760px) { .inspect-hint { display: none; } }
