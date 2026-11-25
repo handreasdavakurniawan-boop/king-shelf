@@ -8,6 +8,12 @@ import Hero from '../hero/Hero'
 import { useInspectControls, resetInspect } from './inspect'
 import { useBrowseControls } from './browse'
 
+// A few motes in the upper half, same look as the hero's dust (fixed so every load matches).
+const DUST = Array.from({ length: 18 }, (_, i) => {
+  const size = 1.6 + (i % 4) * 1.1
+  return { left: `${4 + ((i * 37) % 92)}%`, top: `${5 + ((i * 53) % 90)}%`, width: size, height: size, opacity: 0.12 + (i % 4) * 0.08 }
+})
+
 export default function ShelfPage() {
   const [view, setView] = useState({ first: 0, last: 0, center: 0 })
   const [selected, setSelected] = useState(null)
@@ -81,6 +87,9 @@ export default function ShelfPage() {
             />
           </div>
           <div className="vignette" aria-hidden="true" />
+          <div className="shelf-dust" aria-hidden="true">
+            {DUST.map((d, i) => <span key={i} style={d} />)}
+          </div>
           <Overlay view={view} reading={!!selected} />
         </section>
       </main>

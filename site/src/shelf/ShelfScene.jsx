@@ -8,6 +8,7 @@ import { woodMaterial } from './materials'
 import { inspect } from './inspect'
 import { browse, stepBrowse } from './browse'
 import ShelfBook from './ShelfBook'
+import { drawWall, TILE_W, TILE_H } from '../hero/wall'
 
 const MIN_HALF_VIEW = 1.6 // on narrow (phone) screens, keep at least this much shelf on each side
 const BOOK_H = 3
@@ -74,14 +75,16 @@ function Lamp() {
     l.position.set(camera.position.x + 0.6, 6, 4)
     l.target.position.set(camera.position.x, 1.2, 0)
     l.target.updateMatrixWorld()
-    l.intensity = THREE.MathUtils.damp(l.intensity, shelfState.selected ? 45 : 95, 4, dt)
+    // starts dark and warms up over a second or two the first time the shelf comes into view
+    if (l.intensity > 90) l.userData.warm = true
+    l.intensity = THREE.MathUtils.damp(l.intensity, shelfState.selected ? 45 : 95, l.userData.warm ? 4 : 1.6, dt)
   })
   return (
     <spotLight
       ref={ref}
       angle={0.6}
       penumbra={0.9}
-      intensity={95}
+      intensity={0}
       decay={2}
       color="#ffd9a3"
       castShadow
@@ -104,9 +107,20 @@ function ReadingLight() {
   return <spotLight ref={ref} intensity={0} angle={0.32} penumbra={0.7} decay={2} color="#fff1d6" />
 }
 
+// The hero's stone wall, tiled at about the same on-screen size as on the hero.
+const STONE_W = 2.2 // world units per tile
+function wallTexture(width, height) {
+  const t = new THREE.CanvasTexture(drawWall())
+  t.colorSpace = THREE.SRGBColorSpace
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(width / STONE_W, height / (STONE_W * TILE_H / TILE_W))
+  return t
+}
+
 function Furniture() {
   const length = SHELF_LENGTH + 12
   const wood = useMemo(() => woodMaterial(length), [length])
+  const stone = useMemo(() => wallTexture(length + 30, 14), [length])
   return (
     <>
       <mesh position={[SHELF_LENGTH / 2, -0.09, 0.15]} material={wood} receiveShadow>
@@ -114,7 +128,7 @@ function Furniture() {
       </mesh>
       <mesh position={[SHELF_LENGTH / 2, 4, -1.25]} receiveShadow>
         <planeGeometry args={[length + 30, 14]} />
-        <meshStandardMaterial color="#2b1c14" roughness={1} />
+        <meshStandardMaterial map={stone} roughness={1} />
       </mesh>
     </>
   )

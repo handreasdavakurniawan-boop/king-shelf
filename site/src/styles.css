@@ -96,9 +96,20 @@ html.is-reading { overflow: hidden; }
 html.is-reading .scene { touch-action: none; }
 .scene:active { cursor: grabbing; }
 html.over-book:not(.is-reading) .scene { cursor: pointer; }
+/* The top of the shelf picks up where the hero's bottom fade ends: the same dark, then the
+   candle's warm spill on the left, then the room. */
 .vignette {
   position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgba(10, 5, 3, 0.85) 100%);
+  background:
+    linear-gradient(var(--bg), rgba(28, 18, 13, 0.6) 12%, transparent 30%),
+    radial-gradient(ellipse 40% 35% at 12% 8%, rgba(212, 154, 58, 0.12), transparent),
+    radial-gradient(ellipse 85% 75% at 50% 45%, transparent 55%, rgba(10, 5, 3, 0.85) 100%);
+}
+/* dust from the hero drifting on into the shelf */
+.shelf-dust { position: absolute; inset: 0 0 50% 0; pointer-events: none; }
+.shelf-dust span { position: absolute; border-radius: 50%; background: #ffe7b4; }
+@media (prefers-reduced-motion: no-preference) {
+  .shelf-dust { animation: drift 16s ease-in-out infinite alternate; }
 }
 .overlay { position: absolute; inset: 0; pointer-events: none; }
 .overlay button, .overlay input, .overlay a, .overlay .results { pointer-events: auto; }
@@ -300,7 +311,7 @@ tbody tr:hover { background: var(--bg-raised); }
 .hero-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--bg); }
 /* at the end of the zoom, fade the lit room into the shelf instead of a hard edge */
 .hero-stick::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 180px; pointer-events: none;
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 40vh; height: 40svh; pointer-events: none;
   background: linear-gradient(transparent, var(--bg)); opacity: var(--p);
 }
 .hero-wall {

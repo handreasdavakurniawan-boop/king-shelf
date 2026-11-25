@@ -13,6 +13,7 @@ import frame from './art/frame.svg'
 import sill from './art/sill.svg'
 import books from './art/books.svg'
 import Clock from './Clock'
+import { wallUrl } from './wall'
 import { articles } from '../data/articles'
 import { keystrokeDelay } from './typewriter'
 import { setSound, keyClick, bell } from './sound'
@@ -26,15 +27,6 @@ const DUST = Array.from({ length: 42 }, (_, i) => ({
   left: 300 + ((i * 211) % 860), top: 150 + ((i * 137) % 600), size: 1.6 + (i % 4) * 1.2, opacity: 0.15 + (i % 5) * 0.1,
 }))
 
-// One stone-wall tile, two courses high, staggered so the joints never line up.
-const STONES = [['#221711', '#271b13', '#1e140e'], ['#2a1d14', '#221711', '#271b13']]
-const COURSES = [[150, 110, 140], [90, 180, 130]]
-const WALL = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='156'>${COURSES.map((row, r) => {
-    let x = 0
-    return row.map((w, i) => { const s = `<rect x='${x + 2}' y='${r * 78 + 2}' width='${w - 4}' height='74' rx='9' fill='${STONES[r][i]}'/>`; x += w; return s }).join('')
-  }).join('')}</svg>`,
-)}")`
 
 // The camera push takes the first 1.4 screens of scroll; the rest of the hero holds still
 // on the writer so the clippings can be read.
@@ -142,7 +134,7 @@ export default function Hero() {
   return (
     <section className="hero" id="top" ref={ref} aria-labelledby="hero-title">
       <div className="hero-stick">
-        <div className="hero-wall" style={{ backgroundImage: WALL }} aria-hidden="true" />
+        <div className="hero-wall" style={{ backgroundImage: wallUrl }} aria-hidden="true" />
 
         <div className="hero-stage" aria-hidden="true">
           <div className="hero-zoom">
