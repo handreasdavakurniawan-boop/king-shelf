@@ -319,6 +319,13 @@ tbody tr:hover { background: var(--bg-raised); }
 .far-sharp, .far-soft { position: absolute; inset: 0; }
 .h-scene img, .h-books img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; }
 .h-scene .l-writer { left: 454.5px; top: 259.5px; width: 481px; height: 420px; }
+/* the moving writer: three layers from the Figma components "Penulis lapis / …", at the same
+   place and size (0.74) as the single-image writer in the soft copy */
+.writer { position: absolute; left: 457px; top: 262px; width: 473.6px; height: 414.4px; filter: blur(1.25px); opacity: 0.94; }
+.h-scene .writer img { width: 100%; height: 100%; }
+.h-scene .writer .w-body { width: calc(100% * 643 / 640); }
+.w-head { transform-origin: 44.4% 46%; }   /* the neck */
+.w-arm { transform-origin: 36.2% 46.8%; }  /* the shoulder */
 .halo {
   position: absolute; left: 80px; top: -200px; width: 1280px; height: 1280px;
   background: radial-gradient(closest-side, rgba(212, 154, 58, 0.42), rgba(174, 60, 32, 0.14) 45%, transparent);
@@ -332,7 +339,8 @@ tbody tr:hover { background: var(--bg-raised); }
    fades a finished picture instead of repainting the big SVGs, blurs and text shadows. */
 .hero-zoom, .hero-title, .paper { will-change: transform, opacity; }
 .far-soft, .hero-dim, .hero-stick::after, .t-king::after, .candle-glow { will-change: opacity; }
-.hero-title span, .h-dust, .far-sharp .l-writer { will-change: translate; }
+.hero-title span, .h-dust, .writer { will-change: translate; }
+.w-head, .w-arm { will-change: rotate; }
 .candle-glow {
   position: absolute; left: 150px; top: 440px; width: 220px; height: 220px; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255, 199, 102, 0.4), transparent);
@@ -398,7 +406,9 @@ tbody tr:hover { background: var(--bg-raised); }
   .t-king { --d: 0.75s; }
   .t-shelf { --d: 0.9s; }
   /* only the sharp copy breathes: under the blur it can't be seen, and moving it there would re-blur the room every frame */
-  .far-sharp .l-writer { animation: breathe 4.5s ease-in-out infinite; }
+  .writer { animation: breathe 4.5s ease-in-out infinite; }
+  /* reads back what was typed: the head dips toward the page and lifts again */
+  .w-head { animation: nod 4.2s ease-in-out infinite; }
   .candle-glow { animation: flicker 3.2s steps(1) infinite; }
   .h-dust { animation: drift 14s ease-in-out infinite alternate; }
   .caret { animation: blink 1s steps(1) infinite; }
@@ -411,6 +421,7 @@ tbody tr:hover { background: var(--bg-raised); }
 @keyframes rise { from { opacity: 0; translate: 0 24px; } }
 @keyframes float { 50% { translate: 0 -5px; } }
 @keyframes glow { 50% { opacity: 1; } }
+@keyframes nod { 0%, 100% { rotate: 0deg; } 30% { rotate: 3.5deg; } 55% { rotate: 1deg; } 75% { rotate: 4deg; } }
 @keyframes breathe { 50% { translate: 0 1.5px; } }
 @keyframes flicker { 0% { opacity: 1; } 18% { opacity: 0.72; } 31% { opacity: 0.95; } 56% { opacity: 0.8; } 74% { opacity: 1; } 88% { opacity: 0.86; } }
 @keyframes drift { to { translate: 12px -26px; } }
@@ -421,4 +432,23 @@ tbody tr:hover { background: var(--bg-raised); }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 /* short phones: the turn/zoom hint would sit on top of the open book */
-@media (max-aspect-ratio: 1/1) and (max-height: 760px) { .inspect-hint { display: none; } }
+/* phones: the turn/zoom hint would sit on top of the open book */
+@media (max-aspect-ratio: 1/1) { .inspect-hint { display: none; } }
+
+/* ---------- sound toggle (fixed, so it stays reachable on the shelf) ---------- */
+.sound-toggle {
+  all: unset; box-sizing: border-box; cursor: pointer; position: fixed; right: 20px; bottom: 20px; z-index: 30;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--ink-muted); background: rgba(28, 18, 13, 0.72); border: 1px solid rgba(232, 220, 192, 0.3);
+  backdrop-filter: blur(6px); transition: color 0.2s, border-color 0.2s;
+}
+.sound-toggle:hover, .sound-toggle[aria-pressed='true'] { color: var(--accent); border-color: rgba(212, 154, 58, 0.5); }
+.sound-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* phones: the search dock owns the bottom edge */
+@media (max-aspect-ratio: 1/1) { .sound-toggle { bottom: auto; top: 16px; right: 16px; } }
+/* while a book is open on desktop the detail panel owns the bottom-right; sit beside its close button */
+@media (min-aspect-ratio: 1/1) {
+  /* fade in after the shelf's browse hint (same spot) has faded out */
+  html.is-reading .sound-toggle { bottom: auto; top: 26px; right: 80px; animation: toggle-in 0.4s 0.6s both; }
+}
+@keyframes toggle-in { from { opacity: 0; } }

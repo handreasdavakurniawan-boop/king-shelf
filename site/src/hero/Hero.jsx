@@ -5,11 +5,15 @@ import { useEffect, useRef, useState } from 'react'
 import shafts from './art/shafts.svg'
 import room from './art/room.svg'
 import writer from './art/writer.svg'
+import writerBody from './art/writer-body.svg'
+import writerHead from './art/writer-head.svg'
+import writerArm from './art/writer-arm.svg'
 import glass from './art/glass.svg'
 import frame from './art/frame.svg'
 import sill from './art/sill.svg'
 import books from './art/books.svg'
 import { keystrokeDelay } from './typewriter'
+import { setSound, keyClick, bell } from './sound'
 
 const POEM =
   'The lamp in the upstairs window has not gone out since October. Whoever types up there never asks for supper. ' +
@@ -34,6 +38,7 @@ const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)'
 
 export default function Hero() {
   const ref = useRef()
+  const armRef = useRef()
   const [typed, setTyped] = useState(0)
 
   // Fit the design frame to the screen and track how far the zoom has gone (0..1).
@@ -74,16 +79,48 @@ export default function Hero() {
     }
   }, [])
 
-  // Type the poem once the window has lit up.
+  // The writer types the poem once the window has lit up, then keeps typing in short bursts
+  // (with the odd end-of-line bell) for as long as the hero is on screen.
   useEffect(() => {
     if (reducedMotion()) return setTyped(POEM.length)
+    let visible = true
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting })
+    io.observe(ref.current)
+    let tap
+    const strike = (ch) => {
+      if (document.hidden) return // a background tab doesn't draw, so taps would only pile up
+      tap?.cancel()
+      if (ch !== ' ') tap = armRef.current?.animate([{ rotate: '0deg' }, { rotate: '2.2deg', offset: 0.35 }, { rotate: '0deg' }], { duration: 130, easing: 'ease-out' })
+      if (visible) keyClick() // the poem keeps typing off screen, silently
+    }
     let i = 0
-    let t = setTimeout(function strike() {
+    let t
+    const poem = () => {
+      strike(POEM[i])
       setTyped(++i)
-      if (i < POEM.length) t = setTimeout(strike, keystrokeDelay(POEM[i]))
-    }, 1800)
-    return () => clearTimeout(t)
+      t = setTimeout(i < POEM.length ? poem : idle, i < POEM.length ? keystrokeDelay(POEM[i]) : 2500)
+    }
+    const idle = () => {
+      if (!visible) return (t = setTimeout(idle, 1000))
+      let keys = 6 + Math.floor(Math.random() * 14)
+      const key = () => {
+        strike('x')
+        if (--keys > 0) t = setTimeout(key, keystrokeDelay('x'))
+        else {
+          if (Math.random() < 0.35) bell()
+          t = setTimeout(idle, 1500 + Math.random() * 2500)
+        }
+      }
+      key()
+    }
+    t = setTimeout(poem, 1800)
+    return () => { clearTimeout(t); io.disconnect() }
   }, [])
+
+  // Sound stays off until the visitor asks for it (browsers block it before a click anyway).
+  const [sound, setSoundOn] = useState(false)
+  const toggleSound = () => { setSound(!sound); setSoundOn(!sound) }
+  useEffect(() => () => setSound(false), [])
 
   return (
     <section className="hero" id="top" ref={ref} aria-labelledby="hero-title">
@@ -96,13 +133,21 @@ export default function Hero() {
               <div className="halo" />
               {/* The far room twice: sharp underneath, a blurred copy on top that fades out as you
                   zoom. Only opacity changes per scroll frame, so the blur is never re-rendered. */}
-              {['far-sharp', 'far-soft'].map((c) => (
-                <div key={c} className={c}>
-                  <img src={shafts} alt="" />
-                  <img className="l-room" src={room} alt="" />
-                  <img className="l-writer" src={writer} alt="" />
+              {/* Only the sharp copy has a moving writer (head, typing arm); under the blur it can't be seen. */}
+              <div className="far-sharp">
+                <img src={shafts} alt="" />
+                <img className="l-room" src={room} alt="" />
+                <div className="writer">
+                  <img className="w-body" src={writerBody} alt="" />
+                  <img className="w-head" src={writerHead} alt="" />
+                  <img className="w-arm" src={writerArm} alt="" ref={armRef} />
                 </div>
-              ))}
+              </div>
+              <div className="far-soft">
+                <img src={shafts} alt="" />
+                <img className="l-room" src={room} alt="" />
+                <img className="l-writer" src={writer} alt="" />
+              </div>
               <img className="l-mid l-glass" src={glass} alt="" />
               <img className="l-mid" src={frame} alt="" />
               <img className="l-mid" src={sill} alt="" />
@@ -132,6 +177,16 @@ export default function Hero() {
           </h1>
         </div>
       </div>
+
+      {/* fixed, so it stays reachable on the shelf while the music plays */}
+      <button type="button" className="sound-toggle" aria-pressed={sound} aria-label="Sound" title={sound ? 'Sound on' : 'Sound off'} onClick={toggleSound}>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor" />
+          {sound
+            ? <><path d="M15.5 9a4 4 0 0 1 0 6" /><path d="M18 6.5a7.5 7.5 0 0 1 0 11" /></>
+            : <path d="M16 9.5l5 5M21 9.5l-5 5" />}
+        </svg>
+      </button>
     </section>
   )
 }
