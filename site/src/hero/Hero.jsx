@@ -12,6 +12,8 @@ import glass from './art/glass.svg'
 import frame from './art/frame.svg'
 import sill from './art/sill.svg'
 import books from './art/books.svg'
+import Clock from './Clock'
+import { articles } from '../data/articles'
 import { keystrokeDelay } from './typewriter'
 import { setSound, keyClick, bell } from './sound'
 
@@ -33,6 +35,17 @@ const WALL = `url("data:image/svg+xml,${encodeURIComponent(
     return row.map((w, i) => { const s = `<rect x='${x + 2}' y='${r * 78 + 2}' width='${w - 4}' height='74' rx='9' fill='${STONES[r][i]}'/>`; x += w; return s }).join('')
   }).join('')}</svg>`,
 )}")`
+
+// The camera push takes the first 1.4 screens of scroll; the rest of the hero holds still
+// on the writer so the clippings can be read.
+const ZOOM = 1.4
+
+// Tabbing into a clipping before the zoom has finished jumps to where the clippings show.
+const showNotes = (e) => {
+  const hero = e.currentTarget.closest('.hero')
+  if (reducedMotion() || hero.classList.contains('is-pinned')) return
+  window.scrollTo({ top: hero.getBoundingClientRect().top + window.scrollY + ZOOM * window.innerHeight + 2, behavior: 'instant' })
+}
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -57,18 +70,22 @@ export default function Hero() {
       el.classList.toggle('is-portrait', portrait)
       el.style.setProperty('--s', Math.min(vw / (portrait ? 390 : 1440), vh / (portrait ? 844 : 900)))
       const r = el.getBoundingClientRect()
-      target = reducedMotion() ? 0 : Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - vh)))
+      target = reducedMotion() ? 0 : Math.min(1, Math.max(0, -r.top / (ZOOM * vh)))
+    }
+    const setP = () => {
+      el.style.setProperty('--p', current.toFixed(4))
+      el.classList.toggle('is-pinned', current > 0.85) // the clippings only take clicks once they're shown
     }
     const tick = (now) => {
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60
       last = now
       current += (target - current) * (1 - Math.exp(-dt * 12))
       if (Math.abs(target - current) < 0.0005) current = target
-      el.style.setProperty('--p', current.toFixed(4))
+      setP()
       if (current === target) { raf = 0; last = 0 } else raf = requestAnimationFrame(tick)
     }
     const queue = () => { measure(); raf ||= requestAnimationFrame(tick) }
-    const update = () => { measure(); current = target; el.style.setProperty('--p', current.toFixed(4)) }
+    const update = () => { measure(); current = target; setP() }
     update()
     window.addEventListener('scroll', queue, { passive: true })
     window.addEventListener('resize', queue)
@@ -152,6 +169,7 @@ export default function Hero() {
               <img className="l-mid" src={frame} alt="" />
               <img className="l-mid" src={sill} alt="" />
             </div>
+            <div className="h-clock"><Clock /></div>
             <div className="h-books">
               <img src={books} alt="" />
               <span className="candle-glow" />
@@ -177,6 +195,27 @@ export default function Hero() {
           </h1>
         </div>
       </div>
+
+      {/* pinned over the zoomed-in writer (sticky, same spot as .hero-stick) */}
+      <aside className="hero-notes" aria-labelledby="notes-title" onFocus={showNotes}>
+        <div className="notes-inner">
+          <h2 className="notes-title" id="notes-title">Pinned above the desk</h2>
+          <ul className="notes">
+            {articles.map((a) => (
+              <li className="note" key={a.href}>
+                <p className="note-label">{a.label}</p>
+                <h3>{a.headline}</h3>
+                <p className="note-teaser">{a.teaser}</p>
+                <a href={a.href} target="_blank" rel="noopener noreferrer">
+                  Read the full story<span className="sr-only">: {a.headline} (opens in a new tab)</span>
+                  <span aria-hidden="true"> ↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="notes-swipe" aria-hidden="true">Swipe for more →</p>
+        </div>
+      </aside>
 
       {/* fixed, so it stays reachable on the shelf while the music plays */}
       <button type="button" className="sound-toggle" aria-pressed={sound} aria-label="Sound" title={sound ? 'Sound on' : 'Sound off'} onClick={toggleSound}>
