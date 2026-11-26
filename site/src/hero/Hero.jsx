@@ -36,7 +36,7 @@ const ZOOM = 1.4
 const showNotes = (e) => {
   const hero = e.currentTarget.closest('.hero')
   if (reducedMotion() || hero.classList.contains('is-pinned')) return
-  window.scrollTo({ top: hero.getBoundingClientRect().top + window.scrollY + ZOOM * window.innerHeight + 2, behavior: 'instant' })
+  window.scrollTo({ top: hero.getBoundingClientRect().top + window.scrollY + ZOOM * hero.querySelector('.hero-stick').clientHeight + 2, behavior: 'instant' })
 }
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -55,9 +55,12 @@ export default function Hero() {
     let target = 0
     let current = 0
     let last = 0
+    // Size the stage from the box it is centred in, not the window: on phones window.innerHeight
+    // can differ from that 100svh box, which pushed the title and the poem off screen.
+    const stick = el.querySelector('.hero-stick')
     const measure = () => {
-      const vw = window.innerWidth
-      const vh = window.innerHeight
+      const vw = stick.clientWidth
+      const vh = stick.clientHeight
       const portrait = vw < vh
       el.classList.toggle('is-portrait', portrait)
       el.style.setProperty('--s', Math.min(vw / (portrait ? 390 : 1440), vh / (portrait ? 844 : 900)))
@@ -80,11 +83,12 @@ export default function Hero() {
     const update = () => { measure(); current = target; setP() }
     update()
     window.addEventListener('scroll', queue, { passive: true })
-    window.addEventListener('resize', queue)
+    const sizes = new ResizeObserver(queue)
+    sizes.observe(stick)
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('scroll', queue)
-      window.removeEventListener('resize', queue)
+      sizes.disconnect()
     }
   }, [])
 
