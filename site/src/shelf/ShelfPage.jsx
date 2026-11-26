@@ -19,6 +19,7 @@ export default function ShelfPage() {
   const [selected, setSelected] = useState(null)
   const [sceneEl, setSceneEl] = useState(null)
   const [shelfOnScreen, setShelfOnScreen] = useState(false)
+  const [sceneWanted, setSceneWanted] = useState(false)
   const shelfRef = useRef()
   const { center } = view
 
@@ -35,6 +36,14 @@ export default function ShelfPage() {
     io.observe(el)
     return () => io.disconnect()
   }, [])
+
+  // Building the 3D shelf blocks a slow phone for seconds, so it waits until the hero's intro
+  // has played, or until the visitor reaches the shelf, whichever comes first.
+  useEffect(() => {
+    if (shelfOnScreen) return setSceneWanted(true)
+    const t = setTimeout(() => setSceneWanted(true), 3500)
+    return () => clearTimeout(t)
+  }, [shelfOnScreen])
 
   useBrowseControls(sceneEl, !selected) // swipe / drag / wheel the shelf
   useInspectControls(sceneEl, !!selected) // turn / zoom the opened book
@@ -76,15 +85,17 @@ export default function ShelfPage() {
       <a className="skip-link" href="#shelf">Skip to the shelf</a>
       <main>
         <Hero />
-        <section id="shelf" className="shelf" ref={shelfRef} aria-labelledby="shelf-title" tabIndex={-1}>
+        <section id="shelf" className={`shelf ${shelfOnScreen ? 'is-live' : ''}`} ref={shelfRef} aria-labelledby="shelf-title" tabIndex={-1}>
           <div className="scene" ref={setSceneEl}>
-            <ShelfScene
-              onView={setView}
-              selected={selected}
-              onSelect={open}
-              onClose={close}
-              running={shelfOnScreen || !!selected}
-            />
+            {sceneWanted && (
+              <ShelfScene
+                onView={setView}
+                selected={selected}
+                onSelect={open}
+                onClose={close}
+                running={shelfOnScreen || !!selected}
+              />
+            )}
           </div>
           <div className="vignette" aria-hidden="true" />
           <div className="shelf-dust" aria-hidden="true">

@@ -2,18 +2,17 @@
 // front and a typed page sliding out over the sill. Layers come from the Figma frame
 // "A1 v2 (revisi)" (src/hero/art). Scrolling pushes the camera through the title to the writer.
 import { useEffect, useRef, useState } from 'react'
-import shafts from './art/shafts.svg'
 import room from './art/room.svg'
-import writer from './art/writer.svg'
 import writerBody from './art/writer-body.svg'
 import writerHead from './art/writer-head.svg'
 import writerArm from './art/writer-arm.svg'
-import glass from './art/glass.svg'
-import frame from './art/frame.svg'
-import sill from './art/sill.svg'
-import books from './art/books.svg'
+// the blurred layers, pre-blurred by scripts/bake-hero.mjs
+import beams from './art/beams.webp'
+import soft from './art/soft.webp'
+import front from './art/front.webp'
+import stack from './art/stack.webp'
 import Clock from './Clock'
-import { wallUrl } from './wall'
+import { drawWall } from './wall'
 import { articles } from '../data/articles'
 import { keystrokeDelay } from './typewriter'
 import { setSound, keyClick, bell } from './sound'
@@ -38,6 +37,9 @@ const showNotes = (e) => {
   if (reducedMotion() || hero.classList.contains('is-pinned')) return
   window.scrollTo({ top: hero.getBoundingClientRect().top + window.scrollY + ZOOM * hero.querySelector('.hero-stick').clientHeight + 2, behavior: 'instant' })
 }
+
+// Painted tiny and stretched, so the wall comes out soft without a live blur over the whole screen.
+const WALL = `url(${drawWall(0.15).toDataURL()})`
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -69,7 +71,8 @@ export default function Hero() {
     }
     const setP = () => {
       el.style.setProperty('--p', current.toFixed(4))
-      el.classList.toggle('is-pinned', current > 0.85) // the clippings only take clicks once they're shown
+      el.classList.toggle('is-zooming', current > 0.005) // the sharp room is only drawn once it can show
+      el.classList.toggle('is-pinned', current > 0.7) // the clippings take taps and swipes once they show
     }
     const tick = (now) => {
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60
@@ -100,10 +103,11 @@ export default function Hero() {
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting })
     io.observe(ref.current)
     let tap
+    const still = window.matchMedia('(pointer: coarse)').matches // see styles.css, touch devices
     const strike = (ch) => {
       if (document.hidden) return // a background tab doesn't draw, so taps would only pile up
       tap?.cancel()
-      if (ch !== ' ') tap = armRef.current?.animate([{ rotate: '0deg' }, { rotate: '2.2deg', offset: 0.35 }, { rotate: '0deg' }], { duration: 130, easing: 'ease-out' })
+      if (ch !== ' ' && !still) tap = armRef.current?.animate([{ rotate: '0deg' }, { rotate: '2.2deg', offset: 0.35 }, { rotate: '0deg' }], { duration: 130, easing: 'ease-out' })
       if (visible) keyClick() // the poem keeps typing off screen, silently
     }
     let i = 0
@@ -138,46 +142,40 @@ export default function Hero() {
   return (
     <section className="hero" id="top" ref={ref} aria-labelledby="hero-title">
       <div className="hero-stick">
-        <div className="hero-wall" style={{ backgroundImage: wallUrl }} aria-hidden="true" />
+        <div className="hero-wall" style={{ backgroundImage: WALL }} aria-hidden="true" />
 
         <div className="hero-stage" aria-hidden="true">
           <div className="hero-zoom">
             <div className="h-scene">
               <div className="halo" />
               {/* The far room twice: sharp underneath, a blurred copy on top that fades out as you
-                  zoom. Only opacity changes per scroll frame, so the blur is never re-rendered. */}
-              {/* Only the sharp copy has a moving writer (head, typing arm); under the blur it can't be seen. */}
+                  zoom. Only the sharp copy has a moving writer (head, typing arm). */}
+              <img src={beams} alt="" />
               <div className="far-sharp">
-                <img src={shafts} alt="" />
-                <img className="l-room" src={room} alt="" />
+                <img src={room} alt="" />
                 <div className="writer">
                   <img className="w-body" src={writerBody} alt="" />
                   <img className="w-head" src={writerHead} alt="" />
                   <img className="w-arm" src={writerArm} alt="" ref={armRef} />
                 </div>
               </div>
-              <div className="far-soft">
-                <img src={shafts} alt="" />
-                <img className="l-room" src={room} alt="" />
-                <img className="l-writer" src={writer} alt="" />
-              </div>
-              <img className="l-mid l-glass" src={glass} alt="" />
-              <img className="l-mid" src={frame} alt="" />
-              <img className="l-mid" src={sill} alt="" />
+              <img className="far-soft" src={soft} alt="" />
+              <img src={front} alt="" />
             </div>
             <div className="h-clock"><Clock /></div>
-            <div className="h-books">
-              <img src={books} alt="" />
-              <span className="candle-glow" />
-            </div>
             <div className="h-dust">
               {DUST.map((d, i) => <span key={i} style={{ left: d.left, top: d.top, width: d.size, height: d.size, opacity: d.opacity }} />)}
+            </div>
+            <div className="h-books">
+              <img src={stack} alt="" />
+              <span className="candle-glow" />
             </div>
           </div>
         </div>
 
         <div className="hero-vignette" aria-hidden="true" />
         <div className="hero-dim" aria-hidden="true" />
+        <div className="hero-lights" aria-hidden="true" />
 
         <div className="hero-stage">
           <div className="paper">

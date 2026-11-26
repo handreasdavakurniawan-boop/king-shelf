@@ -316,10 +316,7 @@ tbody tr:hover { background: var(--bg-raised); }
   content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 40vh; height: 40svh; pointer-events: none;
   background: linear-gradient(transparent, var(--bg)); opacity: var(--p);
 }
-.hero-wall {
-  position: absolute; inset: -24px; background-size: calc(var(--tile) * var(--s)) auto;
-  filter: blur(calc(7px * var(--s)));
-}
+.hero-wall { position: absolute; inset: 0; background-size: calc(var(--tile) * var(--s)) auto; }
 .hero-stage {
   position: absolute; left: 50%; top: 50%; width: var(--W); height: var(--H);
   transform: translate(-50%, -50%) scale(var(--s));
@@ -338,10 +335,9 @@ tbody tr:hover { background: var(--bg-raised); }
 .h-books, .h-dust { transform: var(--books); }
 .far-sharp, .far-soft { position: absolute; inset: 0; }
 .h-scene img, .h-books img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; }
-.h-scene .l-writer { left: 454.5px; top: 259.5px; width: 481px; height: 420px; }
 /* the moving writer: three layers from the Figma components "Penulis lapis / …", at the same
-   place and size (0.74) as the single-image writer in the soft copy */
-.writer { position: absolute; left: 457px; top: 262px; width: 473.6px; height: 414.4px; filter: blur(1.25px); opacity: 0.94; }
+   place and size (0.74) as the writer baked into the soft copy */
+.writer { position: absolute; left: 457px; top: 262px; width: 473.6px; height: 414.4px; opacity: 0.94; }
 .h-scene .writer img { width: 100%; height: 100%; }
 .h-scene .writer .w-body { width: calc(100% * 643 / 640); }
 .w-head { transform-origin: 44.4% 46%; }   /* the neck */
@@ -350,17 +346,13 @@ tbody tr:hover { background: var(--bg-raised); }
   position: absolute; left: 80px; top: -200px; width: 1280px; height: 1280px;
   background: radial-gradient(closest-side, rgba(212, 154, 58, 0.42), rgba(174, 60, 32, 0.14) 45%, transparent);
 }
-/* Depth of field: before the zoom the far room is soft; at the end the writer is sharp
-   and the glass, sill and books in front go soft instead. */
-.far-soft { filter: blur(6px); opacity: calc(1 - var(--p)); }
-.l-mid { filter: blur(3px); }
-.h-books img { filter: blur(4px); }
-/* Everything that moves every frame gets its own GPU layer, so the browser only moves or
-   fades a finished picture instead of repainting the big SVGs, blurs and text shadows. */
+/* Depth of field: before the zoom the far room is soft (soft.webp on top); it fades as you zoom
+   in and the writer turns sharp. The glass, sill and books in front stay soft (baked in). */
+.far-soft { opacity: calc(1 - var(--p)); }
+.hero:not(.is-zooming) .far-sharp { visibility: hidden; }
+/* Only what moves on every scroll frame gets its own GPU layer: each one costs graphics memory,
+   and phones and tablets that run out leave parts of the screen blank. */
 .hero-zoom, .hero-title, .paper { will-change: transform, opacity; }
-.far-soft, .hero-dim, .hero-stick::after, .t-king::after, .candle-glow { will-change: opacity; }
-.hero-title span, .h-dust, .writer { will-change: translate; }
-.w-head, .w-arm { will-change: rotate; }
 .candle-glow {
   position: absolute; left: 150px; top: 440px; width: 220px; height: 220px; border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255, 199, 102, 0.4), transparent);
@@ -371,6 +363,8 @@ tbody tr:hover { background: var(--bg-raised); }
   background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 40%, rgba(10, 5, 3, 0.85));
 }
 .hero-dim { position: absolute; inset: 0; background: #0f0805; opacity: calc((1 - var(--p)) * 0.32); }
+/* the room "lights up" as this dark sheet fades away: one flat colour, no image to redraw */
+.hero-lights { position: absolute; inset: 0; background: #0f0805; opacity: 0; pointer-events: none; }
 
 /* the typed page, fed through a slot in the sill and running off the bottom of the screen */
 .paper {
@@ -392,7 +386,8 @@ tbody tr:hover { background: var(--bg-raised); }
 
 /* the title, on its own layer in front of everything */
 .hero-title {
-  position: absolute; inset: 0; margin: 0; font-family: var(--display); font-weight: 600; color: var(--ink);
+  /* only as big as the three words: it is a GPU layer, and a full-stage one costs 3x the memory */
+  position: absolute; left: 0; top: 0; width: 700px; height: 520px; margin: 0; font-family: var(--display); font-weight: 600; color: var(--ink);
   transform-origin: 380px 150px;
   transform: translateY(calc(var(--p) * -140px)) scale(calc(1 + var(--p) * 1.6));
   opacity: calc(1 - var(--p) * 2.2);
@@ -421,11 +416,11 @@ tbody tr:hover { background: var(--bg-raised); }
 .hero-notes {
   position: sticky; top: 0; height: 100vh; height: 100svh; margin-top: -100vh; margin-top: -100svh;
   display: flex; align-items: center; justify-content: flex-end; padding: 72px var(--edge) 88px;
-  pointer-events: none; will-change: opacity;
+  pointer-events: none;
   opacity: clamp(0, calc((var(--p) - 0.6) * 3.4), 1);
   background: linear-gradient(to left, rgba(15, 8, 5, 0.75), rgba(15, 8, 5, 0.35) 45%, transparent 60%);
 }
-.hero.is-pinned .note { pointer-events: auto; }
+.hero.is-pinned .notes, .hero.is-pinned .note { pointer-events: auto; } /* the row too, so gaps swipe */
 .notes-inner { width: min(660px, 48vw); }
 .notes-title { margin: 0 0 14px; font: 400 18px var(--type); color: var(--accent); letter-spacing: 0.02em; }
 .notes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
@@ -452,6 +447,17 @@ tbody tr:hover { background: var(--bg-raised); }
   .note-teaser { font-size: 15px; margin: 8px 0 10px; }
   .note-label::after { margin: 8px 0 10px; }
 }
+/* tablets and small laptops held wide: tighter still, so the last card clears the sound toggle */
+@media (max-height: 700px) and (min-aspect-ratio: 1/1) {
+  .hero-notes { padding-top: 20px; padding-bottom: 72px; }
+  .notes-title { margin-bottom: 8px; font-size: 16px; }
+  .notes { gap: 12px; }
+  .note { padding: 12px 16px; }
+  .note h3 { font-size: 20px; }
+  .note-teaser { font-size: 14px; line-height: 1.4; margin: 6px 0 8px; }
+  .note-label::after { margin: 6px 0 8px; }
+  .note a { font-size: 14px; }
+}
 /* portrait: one row of clippings under the writer, swiped sideways */
 .hero.is-portrait .hero-notes {
   align-items: flex-end; padding: 0 0 40px;
@@ -468,11 +474,10 @@ tbody tr:hover { background: var(--bg-raised); }
 
 /* Motion: the window lights up once, the poem is typed, then a few quiet loops. */
 @media (prefers-reduced-motion: no-preference) {
-  .l-room, .halo { animation: light-up 1.8s 0.2s ease-out both; }
-  .l-glass { animation: glass-up 1.8s 0.2s ease-out both; }
+  .hero-lights { animation: lights 1.8s 0.2s ease-out backwards; }
   /* each line rises in turn, then bobs on its own phase; "King" also glows like it caught the candlelight */
-  .hero-title span { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) both, float 7s calc(var(--d) * 3) ease-in-out infinite; }
-  .hero-title .t-king { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) both, float 7s calc(var(--d) * 3) ease-in-out infinite; }
+  .hero-title span { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) backwards, float 7s calc(var(--d) * 3) ease-in-out infinite; }
+  .hero-title .t-king { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) backwards, float 7s calc(var(--d) * 3) ease-in-out infinite; }
   .t-king::after { animation: glow 6s 2s ease-in-out infinite; }
   .t-the { --d: 0.6s; }
   .t-king { --d: 0.75s; }
@@ -495,10 +500,9 @@ tbody tr:hover { background: var(--bg-raised); }
     position: relative; height: auto; margin-top: 0; opacity: 1; justify-content: center;
     padding: 64px var(--edge) 96px; background: var(--bg);
   }
-  .hero .note { pointer-events: auto; }
+  .hero .notes, .hero .note { pointer-events: auto; }
 }
-@keyframes light-up { from { opacity: 0.08; } }
-@keyframes glass-up { from { opacity: 0.3; } }
+@keyframes lights { from { opacity: 0.85; } to { opacity: 0; } }
 @keyframes rise { from { opacity: 0; translate: 0 24px; } }
 @keyframes float { 50% { translate: 0 -5px; } }
 @keyframes glow { 50% { opacity: 1; } }
@@ -508,6 +512,15 @@ tbody tr:hover { background: var(--bg-raised); }
 @keyframes drift { to { translate: 12px -26px; } }
 @keyframes blink { 50% { opacity: 0; } }
 @keyframes swing { from { rotate: -7deg; } to { rotate: 7deg; } }
+
+/* Phones and tablets: leave out the endless loops over large areas and the live backdrop blur,
+   which cost the most graphics memory. */
+@media (pointer: coarse) and (prefers-reduced-motion: no-preference) {
+  .hero-title span, .hero-title .t-king { animation: rise 1.2s var(--d) cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+  .t-king::after, .h-dust, .writer, .w-head, .shelf-dust { animation: none; }
+}
+/* the shelf's own loop only runs while it is on screen */
+.shelf:not(.is-live) .shelf-dust { animation: none; }
 
 /* Everything else on the page also respects reduced motion (the hero handles its own). */
 @media (prefers-reduced-motion: reduce) {
@@ -534,3 +547,5 @@ tbody tr:hover { background: var(--bg-raised); }
   html.is-reading .sound-toggle { bottom: auto; top: 26px; right: 80px; animation: toggle-in 0.4s 0.6s both; }
 }
 @keyframes toggle-in { from { opacity: 0; } }
+/* touch devices: no live backdrop blur (last, so it wins over the rules above) */
+@media (pointer: coarse) { .sound-toggle, .search input { backdrop-filter: none; } }

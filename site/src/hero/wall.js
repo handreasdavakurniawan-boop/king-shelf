@@ -1,5 +1,5 @@
 // The stone wall behind the hero and the shelf: one tile, two courses high, staggered so the
-// joints never line up. The hero paints it as a CSS background, the shelf as a 3D texture,
+// joints never line up. Both paint it from the same small canvas (CSS background, 3D texture),
 // so scrolling from one to the other stays in the same room.
 const STONES = [['#221711', '#271b13', '#1e140e'], ['#2a1d14', '#221711', '#271b13']]
 const COURSES = [[150, 110, 140], [90, 180, 130]]
@@ -16,12 +16,6 @@ function stones() {
     })
   })
 }
-
-export const wallUrl = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns='http://www.w3.org/2000/svg' width='${TILE_W}' height='${TILE_H}'>${stones()
-    .map((s) => `<rect x='${s.x}' y='${s.y}' width='${s.w}' height='${s.h}' rx='9' fill='${s.fill}'/>`)
-    .join('')}</svg>`,
-)}")`
 
 // Drawn small on purpose: stretched over the wall it comes out soft, like the blurred hero wall.
 export function drawWall(scale = 0.25) {
